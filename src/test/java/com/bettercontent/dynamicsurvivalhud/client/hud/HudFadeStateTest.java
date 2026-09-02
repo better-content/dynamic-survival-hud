@@ -67,6 +67,18 @@ final class HudFadeStateTest {
         assertEquals(0.0F, state.alpha(0.0F, 100, 0, false));
     }
 
+    @Test
+    void explicitHideStartsFullyExpiredAndClearsDanger() {
+        final HudFadeState state = new HudFadeState();
+        state.setDangerous(true);
+
+        state.hide();
+
+        assertFalse(state.isDangerous());
+        assertEquals(Integer.MAX_VALUE, state.ageTicks());
+        assertEquals(0.0F, state.alpha(0.0F, 100, 10, false));
+    }
+
     private static void tick(final HudFadeState state, final int count) {
         for (int tick = 0; tick < count; tick++) {
             state.tick();

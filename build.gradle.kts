@@ -1,3 +1,5 @@
+import java.util.zip.ZipFile
+
 plugins {
     idea
     `maven-publish`
@@ -85,11 +87,17 @@ dependencies {
     testRuntimeOnly(fg.deobf("curse.maven:rehooked-1096531:6341096"))
     compileOnly(fg.deobf("curse.maven:patchouli-306770:7731017"))
     compileOnly("org.valkyrienskies.core:api:1.1.0+cf208d8b56")
+    annotationProcessor("org.spongepowered:mixin:0.8.5:processor")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testImplementation("com.google.code.gson:gson:2.10.1")
 }
 
 tasks.named<Jar>("jar") {
+    dependsOn(tasks.named("compileJava"))
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(layout.buildDirectory.file("tmp/compileJava/compileJava-refmap.json")) {
+        rename { "dynamic_survival_hud.refmap.json" }
+    }
     finalizedBy("reobfJar")
 }
 
@@ -110,6 +118,10 @@ tasks.named("assemble") {
 
 tasks.withType<JavaCompile>().configureEach {
     options.release.set(17)
+}
+
+tasks.named<JavaCompile>("compileJava") {
+    outputs.file(layout.buildDirectory.file("tmp/compileJava/compileJava-refmap.json"))
 }
 
 tasks.test {
@@ -134,6 +146,27 @@ tasks.register("verifyFull") {
     description = "Runs the full verification lane including headless Forge game tests."
     dependsOn(tasks.named("verifyFast"))
     dependsOn(tasks.named("headlessGameTest"))
+    dependsOn("verifyRuntimeJar")
+}
+
+val verifyRuntimeJar by tasks.registering {
+    group = "verification"
+    description = "Rejects a runtime JAR with a missing or incomplete production mixin refmap."
+    dependsOn(stageRuntimeJar)
+
+    val runtimeJar = layout.buildDirectory.file("libs/${base.archivesName.get()}-$version.jar")
+    inputs.file(runtimeJar)
+
+    doLast {
+        ZipFile(runtimeJar.get().asFile).use { zip ->
+            val refmap = zip.getEntry("dynamic_survival_hud.refmap.json")
+                ?: throw GradleException("Runtime JAR is missing dynamic_survival_hud.refmap.json")
+            val refmapText = zip.getInputStream(refmap).bufferedReader().use { it.readText() }
+            check(refmapText.contains("GuiMixin") && refmapText.contains("renderHotbar") && refmapText.contains("renderSlot")) {
+                "Runtime refmap lacks the production mappings for GuiMixin"
+            }
+        }
+    }
 }
 
 val resetGameTestMods = tasks.register<Delete>("resetGameTestMods") {
@@ -166,5 +199,6 @@ tasks.processResources {
 }
 
 mixin {
+    add(sourceSets.main.get(), "dynamic_survival_hud.refmap.json")
     config("dynamic_survival_hud.mixins.json")
 }

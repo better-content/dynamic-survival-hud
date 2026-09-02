@@ -35,4 +35,20 @@ final class DynamicHudRenderStateTest {
         assertFalse(DynamicHudRenderState.isActive(HEALTH));
         assertEquals(0.75F, DynamicHudRenderState.multiplyAlpha(0.75F));
     }
+
+    @Test
+    void fullVisibilityScopeBypassesAndRestoresOverlayAlpha() {
+        DynamicHudRenderState.begin(HEALTH, 0.0F);
+        assertEquals(0.0F, DynamicHudRenderState.alpha());
+
+        DynamicHudRenderState.pushFullVisibility();
+        try {
+            assertEquals(1.0F, DynamicHudRenderState.alpha());
+            assertEquals(0.75F, DynamicHudRenderState.multiplyAlpha(0.75F));
+        } finally {
+            DynamicHudRenderState.popFullVisibility();
+        }
+
+        assertEquals(0.0F, DynamicHudRenderState.alpha());
+    }
 }

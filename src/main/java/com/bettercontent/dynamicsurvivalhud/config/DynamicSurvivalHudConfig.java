@@ -27,8 +27,8 @@ public final class DynamicSurvivalHudConfig {
                 .defineInRange("fadeSeconds", 0.5D, 0.0D, 10.0D);
         DYNAMIC_HUD_DANGER_FRACTION = builder
                 .comment(
-                        "Health, hunger, and thirst remain visible at or below this fraction of their maximum.",
-                        "Air remains visible whenever it is not full; severe Cold Sweat temperatures remain visible independently.")
+                        "Health remains visible at or below this fraction of its maximum.",
+                        "Hunger, thirst, and air remain visible whenever they are not full; severe Cold Sweat temperatures remain visible independently.")
                 .defineInRange("dangerFraction", 1.0D / 3.0D, 0.0D, 1.0D);
         builder.pop();
 

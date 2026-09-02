@@ -122,7 +122,10 @@ public final class DynamicHudController {
                 peeking
         );
         DynamicHudRenderState.begin(event.getOverlay().id(), alpha);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, alpha);
+        DynamicHudRenderState.applyShaderAlpha();
+        if (alpha <= 0.0F && !VanillaGuiOverlay.HOTBAR.id().equals(event.getOverlay().id())) {
+            event.setCanceled(true);
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
@@ -158,7 +161,7 @@ public final class DynamicHudController {
 
         final int food = player.getFoodData().getFoodLevel();
         update(HudElement.HUNGER, food);
-        danger(HudElement.HUNGER, ratio(food, 20) <= dangerFraction);
+        danger(HudElement.HUNGER, depleted(food, 20));
 
         final int air = player.getAirSupply();
         update(HudElement.AIR, air);
@@ -186,7 +189,7 @@ public final class DynamicHudController {
         if (ModList.get().isLoaded("thirst")) {
             final int thirst = ThirstHudTelemetry.sample(player);
             update(HudElement.THIRST, thirst);
-            danger(HudElement.THIRST, ratio(thirst, ThirstHudTelemetry.MAX_THIRST) <= dangerFraction);
+            danger(HudElement.THIRST, depleted(thirst, ThirstHudTelemetry.MAX_THIRST));
         }
 
         if (ModList.get().isLoaded("cold_sweat")) {
@@ -222,6 +225,14 @@ public final class DynamicHudController {
         return maximum <= 0.0D ? 1.0D : value / maximum;
     }
 
+    static boolean depleted(final int value, final int maximum) {
+        return value < maximum;
+    }
+
+    public static boolean keepHotbarSlotVisible(final int renderSeed, final int selectedSlot) {
+        return renderSeed == selectedSlot + 1 || renderSeed > 9;
+    }
+
     private static void update(final HudElement element, final Object value) {
         if (PREVIOUS_VALUES.containsKey(element) && !Objects.equals(PREVIOUS_VALUES.get(element), value)) {
             reveal(element);
@@ -246,8 +257,7 @@ public final class DynamicHudController {
         peeking = false;
         PREVIOUS_VALUES.clear();
         STATES.values().forEach(state -> {
-            state.setDangerous(false);
-            state.reveal();
+            state.hide();
         });
         DynamicHudRenderState.clear();
     }

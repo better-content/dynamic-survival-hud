@@ -14,6 +14,11 @@ public final class HudFadeState {
         ageTicks = 0;
     }
 
+    public void hide() {
+        dangerous = false;
+        ageTicks = Integer.MAX_VALUE;
+    }
+
     public void setDangerous(final boolean dangerous) {
         if (this.dangerous && !dangerous) {
             reveal();

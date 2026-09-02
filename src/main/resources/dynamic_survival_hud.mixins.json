@@ -3,6 +3,7 @@
   "minVersion": "0.8",
   "package": "com.bettercontent.dynamicsurvivalhud.mixin",
   "compatibilityLevel": "JAVA_17",
-  "client": ["RenderSystemMixin"],
+  "refmap": "dynamic_survival_hud.refmap.json",
+  "client": ["GuiMixin", "RenderSystemMixin"],
   "injectors": {"defaultRequire": 1}
 }
