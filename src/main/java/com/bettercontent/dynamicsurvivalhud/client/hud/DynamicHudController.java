@@ -234,7 +234,7 @@ public final class DynamicHudController {
     }
 
     public static boolean keepHotbarSlotVisible(final int renderSeed, final int selectedSlot) {
-        return renderSeed == selectedSlot + 1 || renderSeed > 9;
+        return renderSeed == selectedSlot || renderSeed == -1;
     }
 
     private static void update(final HudElement element, final Object value) {
