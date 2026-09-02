@@ -39,6 +39,14 @@ final class DynamicHudOverlayMappingTest {
     }
 
     @Test
+    void damagedHealthStaysDangerousButFullHealthCanFade() {
+        assertFalse(DynamicHudController.healthDangerous(20.0D, 20.0D, 1.0D));
+        assertTrue(DynamicHudController.healthDangerous(19.0D, 20.0D, 1.0D));
+        assertTrue(DynamicHudController.healthDangerous(6.0D, 20.0D, 1.0D / 3.0D));
+        assertFalse(DynamicHudController.healthDangerous(19.0D, 20.0D, 1.0D / 3.0D));
+    }
+
+    @Test
     void leavesNonSurvivalOverlaysUnmanaged() {
         assertFalse(DynamicHudController.overlayElements().containsKey(VanillaGuiOverlay.CROSSHAIR.id()));
         assertFalse(DynamicHudController.overlayElements().containsKey(VanillaGuiOverlay.CHAT_PANEL.id()));

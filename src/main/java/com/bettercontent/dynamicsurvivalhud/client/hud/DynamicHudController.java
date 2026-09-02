@@ -155,7 +155,7 @@ public final class DynamicHudController {
         final double dangerFraction = DynamicSurvivalHudConfig.dynamicHudDangerFraction();
 
         update(HudElement.HEALTH, new HealthValue(player.getHealth(), player.getAbsorptionAmount(), player.getMaxHealth()));
-        danger(HudElement.HEALTH, ratio(player.getHealth(), player.getMaxHealth()) <= dangerFraction);
+        danger(HudElement.HEALTH, healthDangerous(player.getHealth(), player.getMaxHealth(), dangerFraction));
 
         update(HudElement.ARMOR, armorValue(player));
 
@@ -223,6 +223,10 @@ public final class DynamicHudController {
 
     private static double ratio(final double value, final double maximum) {
         return maximum <= 0.0D ? 1.0D : value / maximum;
+    }
+
+    static boolean healthDangerous(final double health, final double maximum, final double dangerFraction) {
+        return health < maximum && ratio(health, maximum) <= dangerFraction;
     }
 
     static boolean depleted(final int value, final int maximum) {
