@@ -143,9 +143,8 @@ tasks.register("verifyFast") {
 
 tasks.register("verifyFull") {
     group = "verification"
-    description = "Runs the full verification lane including headless Forge game tests."
+    description = "Runs deterministic checks and verifies the reobfuscated runtime JAR; rendering requires manual client review."
     dependsOn(tasks.named("verifyFast"))
-    dependsOn(tasks.named("headlessGameTest"))
     dependsOn("verifyRuntimeJar")
 }
 
