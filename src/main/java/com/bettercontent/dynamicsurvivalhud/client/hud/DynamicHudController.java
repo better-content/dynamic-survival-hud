@@ -29,6 +29,8 @@ import java.util.Objects;
 
 @Mod.EventBusSubscriber(modid = DynamicSurvivalHud.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class DynamicHudController {
+    private static final int FIRST_HOTBAR_RENDER_SEED = 1;
+    private static final int OFFHAND_RENDER_SEED = 10;
     private static final ResourceLocation THIRST_OVERLAY = new ResourceLocation("thirst", "thirst_level");
     private static final ResourceLocation COLD_SWEAT_BODY_TEMP = new ResourceLocation("cold_sweat", "body_temp");
     private static final ResourceLocation COLD_SWEAT_VAGUE_TEMP = new ResourceLocation("cold_sweat", "vague_temp");
@@ -234,7 +236,7 @@ public final class DynamicHudController {
     }
 
     public static boolean keepHotbarSlotVisible(final int renderSeed, final int selectedSlot) {
-        return renderSeed == selectedSlot || renderSeed == -1;
+        return renderSeed == selectedSlot + FIRST_HOTBAR_RENDER_SEED || renderSeed == OFFHAND_RENDER_SEED;
     }
 
     private static void update(final HudElement element, final Object value) {

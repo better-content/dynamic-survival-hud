@@ -30,14 +30,23 @@ final class DynamicHudOverlayMappingTest {
     }
 
     @Test
-    void depletionAndPersistentHotbarSlotsUseExactBoundaries() {
+    void depletionUsesExactBoundary() {
         assertFalse(DynamicHudController.depleted(20, 20));
         assertTrue(DynamicHudController.depleted(19, 20));
-        assertTrue(DynamicHudController.keepHotbarSlotVisible(0, 0));
-        assertTrue(DynamicHudController.keepHotbarSlotVisible(8, 8));
-        assertTrue(DynamicHudController.keepHotbarSlotVisible(-1, 3));
-        assertFalse(DynamicHudController.keepHotbarSlotVisible(3, 4));
-        assertFalse(DynamicHudController.keepHotbarSlotVisible(9, 3));
+    }
+
+    @Test
+    void keepsExactlyTheSelectedHotbarSlotAndOffhandVisible() {
+        for (int selectedSlot = 0; selectedSlot < 9; selectedSlot++) {
+            for (int renderSeed = 1; renderSeed <= 9; renderSeed++) {
+                assertEquals(renderSeed == selectedSlot + 1,
+                        DynamicHudController.keepHotbarSlotVisible(renderSeed, selectedSlot));
+            }
+            assertTrue(DynamicHudController.keepHotbarSlotVisible(10, selectedSlot));
+        }
+
+        assertFalse(DynamicHudController.keepHotbarSlotVisible(0, 0));
+        assertFalse(DynamicHudController.keepHotbarSlotVisible(11, 8));
     }
 
     @Test
