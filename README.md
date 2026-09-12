@@ -12,3 +12,5 @@ This client mod has no server GameTests. Starting the optional `headlessGameTest
 server therefore provides no behavioral coverage and is not part of `verifyFull`.
 HUD fading, danger/interaction cues, layout, and compatibility rendering require
 manual review in a client; automated verification does not claim to check them.
+
+Death’s Door supplies semantic health and actual injury risk through `DynamicSurvivalHudClientApi.setInjuryHealth`. Semantic zero keeps health visible during Death’s Door; changed injury risk reveals the health bar after treatment or maiming. Companion skull marks use `healthAlpha` to follow the same fading above zero. Injury authority and probabilities remain in Revival.

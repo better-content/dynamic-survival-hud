@@ -59,6 +59,9 @@ public final class DynamicHudController {
     private static LocalPlayer trackedPlayer;
     private static boolean peeking;
     private static boolean wasEnabled = true;
+    private static boolean injuryAtDoor;
+    private static float semanticHealth = Float.NaN;
+    private static double injuryProbability;
 
     static {
         for (HudElement element : HudElement.values()) {
@@ -96,6 +99,20 @@ public final class DynamicHudController {
 
         STATES.values().forEach(HudFadeState::tick);
         sample(player, minecraft);
+    }
+
+    public static void setInjuryHealth(boolean atDoor, float health, double probability) {
+        injuryAtDoor = atDoor;
+        semanticHealth = Math.max(0, health);
+        double bounded = Math.max(0, Math.min(1, probability));
+        if (Double.compare(injuryProbability, bounded) != 0) reveal(HudElement.HEALTH);
+        injuryProbability = bounded;
+    }
+
+    public static float healthAlpha(float partialTick) {
+        if (!DynamicSurvivalHudConfig.dynamicHudEnabled()) return 1;
+        return STATES.get(HudElement.HEALTH).alpha(partialTick,
+            DynamicSurvivalHudConfig.dynamicHudHoldTicks(), DynamicSurvivalHudConfig.dynamicHudFadeTicks(), peeking);
     }
 
     public static void onPhysicalSneak(final boolean down) {
@@ -156,8 +173,9 @@ public final class DynamicHudController {
     private static void sample(final LocalPlayer player, final Minecraft minecraft) {
         final double dangerFraction = DynamicSurvivalHudConfig.dynamicHudDangerFraction();
 
-        update(HudElement.HEALTH, new HealthValue(player.getHealth(), player.getAbsorptionAmount(), player.getMaxHealth()));
-        danger(HudElement.HEALTH, healthDangerous(player.getHealth(), player.getMaxHealth(), dangerFraction));
+        final float displayedHealth = Float.isNaN(semanticHealth) ? player.getHealth() : semanticHealth;
+        update(HudElement.HEALTH, new HealthValue(displayedHealth, player.getAbsorptionAmount(), player.getMaxHealth()));
+        danger(HudElement.HEALTH, injuryAtDoor || healthDangerous(displayedHealth, player.getMaxHealth(), dangerFraction));
 
         update(HudElement.ARMOR, armorValue(player));
 
@@ -260,6 +278,9 @@ public final class DynamicHudController {
 
     private static void reset(final LocalPlayer player) {
         trackedPlayer = player;
+        injuryAtDoor = false;
+        semanticHealth = Float.NaN;
+        injuryProbability = 0;
         peeking = false;
         PREVIOUS_VALUES.clear();
         STATES.values().forEach(state -> {
